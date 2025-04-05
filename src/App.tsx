@@ -33,15 +33,8 @@ const SelectedPokemons = () => {
 
 const Search = () => {
   const [search, setSearch] = useState("");
-  const [pokemons, setPokemons] = useState<Pokemon[]>([]);
 
-  useEffect(() => {
-    const pokemonsSubscriber = pokemons$.subscribe((pokemonsData) =>
-      setPokemons(pokemonsData)
-    );
-
-    return () => pokemonsSubscriber.unsubscribe();
-  }, []);
+  const pokemons = useObservableState(pokemons$, []);
 
   const filteredPokemons = useMemo(() => {
     return pokemons.filter((pokemon) =>
