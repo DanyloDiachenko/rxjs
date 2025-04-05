@@ -1,37 +1,38 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import "./App.css";
-import {
-  Pokemon,
-  pokemons$,
-  selectedPokemonIds$,
-  selectedPokemons$,
-} from "./store";
+import { PokemonsProvider, usePokemons } from "./store";
 import { useObservableState } from "observable-hooks";
 
 const SelectedPokemons = () => {
+  const { selectedPokemons$ } = usePokemons();
+
   const selectedPokemons = useObservableState(selectedPokemons$, []);
 
   return (
-    <div>
-      <h4>Deck</h4>
+    <PokemonsProvider>
       <div>
-        {selectedPokemons.map((pokemon) => (
-          <div key={pokemon.id} style={{ display: "flex" }}>
-            <img
-              src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`}
-              alt={pokemon.name}
-            />
-            <div>
-              <div>{pokemon.name}</div>
+        <h4>Deck</h4>
+        <div>
+          {selectedPokemons.map((pokemon) => (
+            <div key={pokemon.id} style={{ display: "flex" }}>
+              <img
+                src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`}
+                alt={pokemon.name}
+              />
+              <div>
+                <div>{pokemon.name}</div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
+    </PokemonsProvider>
   );
 };
 
 const Search = () => {
+  const { pokemons$, selectedPokemonIds$ } = usePokemons();
+
   const [search, setSearch] = useState("");
 
   const pokemons = useObservableState(pokemons$, []);

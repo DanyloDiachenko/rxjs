@@ -1,3 +1,4 @@
+import { createContext, FunctionComponent, ReactNode, useContext } from "react";
 import { BehaviorSubject, map, combineLatestWith } from "rxjs";
 
 export interface Pokemon {
@@ -50,3 +51,25 @@ export const selectedPokemons$ = pokemons$.pipe(
 fetch("/pokemon-data.json")
   .then((res) => res.json())
   .then((data) => rawPokemons$.next(data));
+
+const PokemonsContext = createContext({
+  pokemons$,
+  selectedPokemonIds$,
+  selectedPokemons$,
+});
+
+export const usePokemons = () => useContext(PokemonsContext);
+
+export const PokemonsProvider = ({ children }: { children: ReactNode }) => {
+  return (
+    <PokemonsContext.Provider
+      value={{
+        pokemons$,
+        selectedPokemonIds$,
+        selectedPokemons$,
+      }}
+    >
+      {children}
+    </PokemonsContext.Provider>
+  );
+};
