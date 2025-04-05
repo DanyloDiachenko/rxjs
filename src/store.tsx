@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext } from "react";
 import { BehaviorSubject, map, combineLatestWith } from "rxjs";
 
-interface Pokemon {
+export interface Pokemon {
   id: number;
   name: string;
   type: string[];
@@ -16,6 +16,8 @@ interface Pokemon {
 }
 
 const rawPokemons$ = new BehaviorSubject<Pokemon[]>([]);
+
+const search$ = new BehaviorSubject("");
 
 const selectedPokemonIds$ = new BehaviorSubject<number[]>([]);
 
@@ -56,6 +58,7 @@ const PokemonsContext = createContext({
   pokemons$,
   selectedPokemonIds$,
   selectedPokemons$,
+  search$,
 });
 
 export const usePokemons = () => useContext(PokemonsContext);
@@ -67,6 +70,7 @@ export const PokemonsProvider = ({ children }: { children: ReactNode }) => {
         pokemons$,
         selectedPokemonIds$,
         selectedPokemons$,
+        search$,
       }}
     >
       {children}

@@ -1,8 +1,7 @@
-import { useMemo, useState } from "react";
 import "./App.css";
-import { PokemonsProvider, usePokemons } from "./store";
 import { useObservableState } from "observable-hooks";
-import { BehaviorSubject, combineLatestWith, map } from "rxjs";
+import { combineLatestWith, map } from "rxjs";
+import { PokemonsProvider, usePokemons } from "./store";
 
 const SelectedPokemons = () => {
   const { selectedPokemons$ } = usePokemons();
@@ -12,31 +11,34 @@ const SelectedPokemons = () => {
   return (
     <PokemonsProvider>
       <div>
-        <h4>Deck</h4>
-        <div>
-          {selectedPokemons.map((pokemon) => (
-            <div key={pokemon.id} style={{ display: "flex" }}>
-              <img
-                src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`}
-                alt={pokemon.name}
-              />
-              <div>
-                <div>{pokemon.name}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <h2>Deck</h2>
+        <ul>
+          {selectedPokemons.length ? (
+            selectedPokemons.map((pokemon) => (
+              <li
+                key={pokemon.id}
+                style={{ display: "flex", alignItems: "center", gap: 12 }}
+              >
+                <img
+                  src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`}
+                  alt={pokemon.name}
+                  width={80}
+                  height={80}
+                />
+                <strong>{pokemon.name}</strong>
+              </li>
+            ))
+          ) : (
+            <p>Nothing found...</p>
+          )}
+        </ul>
       </div>
     </PokemonsProvider>
   );
 };
 
-const Search = () => {
-  const { pokemons$, selectedPokemonIds$ } = usePokemons();
-
-  const search$ = useMemo(() => new BehaviorSubject(""), []);
-
-  const pokemons = useObservableState(pokemons$, []);
+const AllPokemons = () => {
+  const { pokemons$, selectedPokemonIds$, search$ } = usePokemons();
 
   const [filteredPokemons] = useObservableState(
     () =>
@@ -51,51 +53,85 @@ const Search = () => {
     []
   );
 
+  const onSelectPokemonClick = (pokemonId: number) => {
+    return () => {
+      if (selectedPokemonIds$.value.includes(pokemonId)) {
+        selectedPokemonIds$.next(
+          selectedPokemonIds$.value.filter(
+            (selectedPokemonId) => selectedPokemonId !== pokemonId
+          )
+        );
+      } else {
+        selectedPokemonIds$.next([...selectedPokemonIds$.value, pokemonId]);
+      }
+    };
+  };
+
   return (
-    <div>
-      <input
-        type="text"
-        value={search$.value}
-        onChange={(e) => search$.next(e.target.value)}
-      />
-      <div>
-        {filteredPokemons.map((pokemon) => (
-          <div key={pokemon.id}>
+    <ul style={{ marginTop: 12 }}>
+      {filteredPokemons.length ? (
+        filteredPokemons.map((pokemon) => (
+          <li
+            key={pokemon.id}
+            style={{
+              marginTop: 4,
+              padding: 4,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              cursor: "pointer",
+            }}
+            onClick={onSelectPokemonClick(pokemon.id)}
+          >
             <input
               type="checkbox"
               checked={pokemon.isSelected}
-              onChange={() => {
-                if (selectedPokemonIds$.value.includes(pokemon.id)) {
-                  selectedPokemonIds$.next(
-                    selectedPokemonIds$.value.filter((id) => id !== pokemon.id)
-                  );
-                } else {
-                  selectedPokemonIds$.next([
-                    ...selectedPokemonIds$.value,
-                    pokemon.id,
-                  ]);
-                }
-              }}
+              onChange={() => {}}
             />
-            <strong>{pokemon.name}</strong> - {pokemon.power}
-          </div>
-        ))}
-      </div>
-    </div>
+            <strong>{pokemon.name}</strong> | {pokemon.power} 💪
+          </li>
+        ))
+      ) : (
+        <p>Nothing found...</p>
+      )}
+    </ul>
+  );
+};
+
+const Search = () => {
+  const { search$ } = usePokemons();
+
+  const search = useObservableState(search$, "");
+
+  return (
+    <input
+      type="text"
+      value={search}
+      onChange={(e) => search$.next(e.target.value)}
+      placeholder="Search..."
+    />
   );
 };
 
 const App = () => {
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 1fr",
-      }}
-    >
-      <Search />
-      <SelectedPokemons />
-    </div>
+    <>
+      <h1>Reactive Pokemons</h1>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 40,
+          marginTop: 40,
+        }}
+      >
+        <div>
+          <Search />
+          <AllPokemons />
+        </div>
+        <SelectedPokemons />
+      </div>
+    </>
   );
 };
 
