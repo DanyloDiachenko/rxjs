@@ -1,4 +1,4 @@
-import { BehaviorSubject, map } from "rxjs";
+import { BehaviorSubject, map, combineLatestWith } from "rxjs";
 
 export interface Pokemon {
   id: number;
@@ -11,11 +11,14 @@ export interface Pokemon {
   special_defense: number;
   speed: number;
   power?: number;
+  isSelected?: boolean;
 }
 
 const rawPokemons$ = new BehaviorSubject<Pokemon[]>([]);
 
-export const pokemonsWithPower$ = rawPokemons$.pipe(
+export const selectedPokemonIds$ = new BehaviorSubject<number[]>([]);
+
+const pokemonsWithPower$ = rawPokemons$.pipe(
   map((pokemons) =>
     pokemons.map((pokemon) => ({
       ...pokemon,
@@ -26,6 +29,16 @@ export const pokemonsWithPower$ = rawPokemons$.pipe(
         pokemon.special_attack +
         pokemon.special_defense +
         pokemon.speed,
+    }))
+  )
+);
+
+export const pokemons$ = pokemonsWithPower$.pipe(
+  combineLatestWith(selectedPokemonIds$),
+  map(([pokemons, selectedPokemonIds]) =>
+    pokemons.map((pokemon) => ({
+      ...pokemon,
+      isSelected: selectedPokemonIds.includes(pokemon.id),
     }))
   )
 );

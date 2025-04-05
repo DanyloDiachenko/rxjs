@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-import { Pokemon, pokemonsWithPower$ } from "./store";
+import { Pokemon, pokemons$, selectedPokemonIds$ } from "./store";
 
 const Search = () => {
   const [search, setSearch] = useState("");
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
 
   useEffect(() => {
-    const pokemonsSubscriber = pokemonsWithPower$.subscribe((pokemonsData) =>
+    const pokemonsSubscriber = pokemons$.subscribe((pokemonsData) =>
       setPokemons(pokemonsData)
     );
 
@@ -30,6 +30,22 @@ const Search = () => {
       <div>
         {filteredPokemons.map((pokemon) => (
           <div key={pokemon.id}>
+            <input
+              type="checkbox"
+              checked={pokemon.isSelected}
+              onChange={() => {
+                if (selectedPokemonIds$.value.includes(pokemon.id)) {
+                  selectedPokemonIds$.next(
+                    selectedPokemonIds$.value.filter((id) => id !== pokemon.id)
+                  );
+                } else {
+                  selectedPokemonIds$.next([
+                    ...selectedPokemonIds$.value,
+                    pokemon.id,
+                  ]);
+                }
+              }}
+            />
             <strong>{pokemon.name}</strong> - {pokemon.power}
           </div>
         ))}
