@@ -43,6 +43,10 @@ export const pokemons$ = pokemonsWithPower$.pipe(
   )
 );
 
+export const selectedPokemons$ = pokemons$.pipe(
+  map((pokemons) => pokemons.filter((pokemon) => pokemon.isSelected))
+);
+
 fetch("/pokemon-data.json")
   .then((res) => res.json())
   .then((data) => rawPokemons$.next(data));

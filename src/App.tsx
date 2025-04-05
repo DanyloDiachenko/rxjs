@@ -1,6 +1,35 @@
 import { useEffect, useMemo, useState } from "react";
 import "./App.css";
-import { Pokemon, pokemons$, selectedPokemonIds$ } from "./store";
+import {
+  Pokemon,
+  pokemons$,
+  selectedPokemonIds$,
+  selectedPokemons$,
+} from "./store";
+import { useObservableState } from "observable-hooks";
+
+const SelectedPokemons = () => {
+  const selectedPokemons = useObservableState(selectedPokemons$, []);
+
+  return (
+    <div>
+      <h4>Deck</h4>
+      <div>
+        {selectedPokemons.map((pokemon) => (
+          <div key={pokemon.id} style={{ display: "flex" }}>
+            <img
+              src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`}
+              alt={pokemon.name}
+            />
+            <div>
+              <div>{pokemon.name}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const Search = () => {
   const [search, setSearch] = useState("");
@@ -63,6 +92,7 @@ const App = () => {
       }}
     >
       <Search />
+      <SelectedPokemons />
     </div>
   );
 };
