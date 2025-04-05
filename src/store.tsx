@@ -1,7 +1,7 @@
-import { createContext, FunctionComponent, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext } from "react";
 import { BehaviorSubject, map, combineLatestWith } from "rxjs";
 
-export interface Pokemon {
+interface Pokemon {
   id: number;
   name: string;
   type: string[];
@@ -17,7 +17,7 @@ export interface Pokemon {
 
 const rawPokemons$ = new BehaviorSubject<Pokemon[]>([]);
 
-export const selectedPokemonIds$ = new BehaviorSubject<number[]>([]);
+const selectedPokemonIds$ = new BehaviorSubject<number[]>([]);
 
 const pokemonsWithPower$ = rawPokemons$.pipe(
   map((pokemons) =>
@@ -34,7 +34,7 @@ const pokemonsWithPower$ = rawPokemons$.pipe(
   )
 );
 
-export const pokemons$ = pokemonsWithPower$.pipe(
+const pokemons$ = pokemonsWithPower$.pipe(
   combineLatestWith(selectedPokemonIds$),
   map(([pokemons, selectedPokemonIds]) =>
     pokemons.map((pokemon) => ({
@@ -44,7 +44,7 @@ export const pokemons$ = pokemonsWithPower$.pipe(
   )
 );
 
-export const selectedPokemons$ = pokemons$.pipe(
+const selectedPokemons$ = pokemons$.pipe(
   map((pokemons) => pokemons.filter((pokemon) => pokemon.isSelected))
 );
 
