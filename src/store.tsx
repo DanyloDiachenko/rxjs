@@ -1,6 +1,6 @@
-import { BehaviorSubject } from "rxjs";
+import { BehaviorSubject, map } from "rxjs";
 
-interface Pokemon {
+export interface Pokemon {
   id: number;
   name: string;
   type: string[];
@@ -10,10 +10,26 @@ interface Pokemon {
   special_attack: number;
   special_defense: number;
   speed: number;
+  power?: number;
 }
 
-export const rawPokemon$ = new BehaviorSubject<Pokemon[]>([]);
+const rawPokemons$ = new BehaviorSubject<Pokemon[]>([]);
+
+export const pokemonsWithPower$ = rawPokemons$.pipe(
+  map((pokemons) =>
+    pokemons.map((pokemon) => ({
+      ...pokemon,
+      power:
+        pokemon.hp +
+        pokemon.attack +
+        pokemon.defense +
+        pokemon.special_attack +
+        pokemon.special_defense +
+        pokemon.speed,
+    }))
+  )
+);
 
 fetch("/pokemon-data.json")
   .then((res) => res.json())
-  .then((data) => rawPokemon$.next(data));
+  .then((data) => rawPokemons$.next(data));
